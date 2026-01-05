@@ -1,0 +1,18 @@
+run:
+  batch_size: 100
+  max_retries: 5
+  backoff_sec: 5
+  target_table: public.processed_data
+
+source:
+  api:
+    endpoint: https://api.example.com/data
+    auth_token: YOUR_API_TOKEN_HERE
+    timeout_sec: 30
+  database:
+    host: db.example.com
+    port: 5432
+    username: db_user
+    password: YOUR_DB_PASSWORD_HERE
+    database_name: source_db
+    table_name: raw_data
