@@ -1,18 +1,23 @@
 run:
   batch_size: 100
-  max_retries: 5
-  backoff_sec: 5
-  target_table: public.processed_data
+  max_retries: 3
+  backoff_seconds: 5
+  target_table1: public.customers
+  target_table2: public.loans
+  target_table3: public.transactions
+  target_table4: public.accounts
 
-source:
+sources:
   api:
-    endpoint: https://api.example.com/data
-    auth_token: YOUR_API_TOKEN_HERE
-    timeout_sec: 30
-  database:
-    host: db.example.com
-    port: 5432
-    username: db_user
-    password: YOUR_DB_PASSWORD_HERE
-    database_name: source_db
-    table_name: raw_data
+    endpoint_accounts: "accounts"
+    endpoint_customers: "customers"
+    endpoint_branches: "branches"
+    endpoint_txn: "transactions"
+    endpoint_loan: "loans"
+    page_param: "page"
+    per_page_param: "per_page"
+    per_page: 6
+    data_key: "data"
+  load:
+    mode: "upsert"
+
