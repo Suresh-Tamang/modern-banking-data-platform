@@ -10,6 +10,11 @@ class Transaction(BaseModel):
     created_at: str = Field(..., description="Timestamp when the transaction was created in ISO format")
     updated_at: str = Field(..., description="Timestamp when the transaction was last updated in ISO format")
 
+    @field_validator('transaction_id', 'account_id', 'transaction_type', 'transaction_date', 'created_at', 'updated_at')
+    def not_empty(cls, v):
+        if not v or not v.strip():
+            raise ValueError('Field must not be empty')
+        return v
     
     @field_validator('amount')
     def validate_amount(cls, v):
