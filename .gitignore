@@ -1,3 +1,4 @@
 **/logs/
 note.txt
 dbt/logs/
+.venv
