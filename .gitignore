@@ -2,3 +2,6 @@
 note.txt
 dbt/logs/
 .venv
+dags
+.db
+dbt

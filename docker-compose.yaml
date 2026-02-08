@@ -8,9 +8,20 @@ services:
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - .db/postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+
+  warehouse_postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: warehouse
+      POSTGRES_PASSWORD: warehouse
+      POSTGRES_DB: warehouse
+    volumes:
+      - .db/postgres_warehouse:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
 
   airflow:
     image: apache/airflow:2.7.0
@@ -38,7 +49,6 @@ services:
   python:
     image: python:3.10
     volumes:
-      - ./scripts:/app
       - ./etl:/app/etl
     working_dir: /app/etl
     command: tail -f /dev/null
@@ -54,6 +64,3 @@ services:
     depends_on:
       - postgres
     command: bash -c "superset db upgrade && superset fab create-admin --username admin --firstname Admin --lastname User --email admin@example.com --password admin || true && superset load-examples || true && superset run -h 0.0.0.0"
-
-volumes:
-  postgres_data:
