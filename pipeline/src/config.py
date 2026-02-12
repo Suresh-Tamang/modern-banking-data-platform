@@ -20,3 +20,6 @@ def env(key: str) -> str:
     if value is None:
         raise EnvironmentError(f"Environment variable '{key}' not found.")
     return value
+
+
+print(env("TRANSACTION_API_URL"),"transactions")

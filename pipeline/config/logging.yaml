@@ -2,7 +2,7 @@ version: 1
 
 formatters:
   json:
-    '{"timestamp": "%(asctime)s", "level":"%(levelname)s", "message":"%(message)s","name":"%(name)s"}'
+    format: '{"timestamp": "%(asctime)s", "level":"%(levelname)s", "message":"%(message)s","name":"%(name)s"}'
 
 handlers:
   console:

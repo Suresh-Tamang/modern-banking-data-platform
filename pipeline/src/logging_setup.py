@@ -19,3 +19,4 @@ def setup_logging() -> None:
         if 'file' in config.get('handlers', {}):
             config['handlers']['file']['filename']=str(logs_dir/'etl.log')
         logging.config.dictConfig(config)
+        

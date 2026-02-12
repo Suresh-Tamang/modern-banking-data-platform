@@ -17,7 +17,7 @@ sources:
     page_param: "page"
     per_page_param: "per_page"
     per_page: 6
-    data_key: "data"
+    data_key: "results"
   load:
     mode: "upsert"
 
