@@ -18,7 +18,7 @@ def env(key: str) -> str:
     """Get environment variable or raise error if not found."""
     value = os.getenv(key)
     if value is None:
-        raise EnvironmentError(f"Environment variable '{key}' not found.")
+        raise EnvironmentError(f"Environment variable '{key}' not fo    und.")
     return value
 
 
