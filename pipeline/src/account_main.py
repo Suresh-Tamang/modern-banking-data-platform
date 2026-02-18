@@ -6,7 +6,7 @@ from src import config
 from src.logging_setup import setup_logging
 from src.etl.extract import transaction_extraction
 from src.etl.transform import transaction_transformation
-from src.etl.load import transaction_upsert
+from pipeline.src.etl.load import transaction_load
 
 
 def run() -> None:
@@ -40,7 +40,7 @@ def run() -> None:
         return
     # load data
     logger.info("Starting data load into the data warehouse.")
-    transaction_upsert.copy_data_to_warehouse(
+    transaction_load.copy_data_to_warehouse(
         dsn=config.env("DATA_WAREHOUSE_DSN"),
         table=config.env("TRANSACTION_TABLE"),
         df=df_transformed

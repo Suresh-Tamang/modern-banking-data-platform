@@ -9,7 +9,7 @@ payload = {
 }
 env_path = '.env'
 response = requests.post(
-    'http://127.0.0.1:9000/api/token/create/',
+    'http://127.0.0.1:8555/api/token/create/',
     json=payload
 )
 
