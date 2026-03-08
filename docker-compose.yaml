@@ -82,8 +82,7 @@ services:
     stdin_open: true
     volumes:
       - ./pipeline:/app/etl
-      - ./requirements.txt:/app/requirements.txt
-    working_dir: /app/etl/pipeline
+    working_dir: /app/etl
     environment:
       # Use the service names from docker-compose as hostnames
       WAREHOUSE_HOST: warehouse_postgres

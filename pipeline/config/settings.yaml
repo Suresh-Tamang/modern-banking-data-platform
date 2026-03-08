@@ -1,0 +1,30 @@
+run:
+  batch_size: 1000
+  max_retries: 3
+  backoff_seconds: 5
+  txn_table: public.transactions
+  account_table: public.accounts
+  branch_table: public.branches
+  loans_table: public.loans
+  customers_table: public.customers
+
+sources:
+  file:
+    path: "data/transactions.csv"
+    delimiter: ","
+  api:
+    endpoint_transaction: "transactions"
+    endpoint_account: "accounts"
+    endpoint_branch: "branches"
+    endpoint_loans: "loans"
+    endpoint_customers: "customers"
+    page_param: "page"
+    per_page_param: "per_page"
+    per_page: 50
+    data_key: "results"
+  db:
+    query: "SELECT * FROM public.latest_users WHERE true LIMIT :limit OFFSET :offset"
+  load:
+    mode: "upsert"
+    key_columns: ["id"]
+  
