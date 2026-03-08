@@ -23,5 +23,6 @@ venv.bak/
 *.bak
 *.tmp
 *.log
-airflow
 db
+airflow/logs
+airflow/plugins

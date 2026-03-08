@@ -95,10 +95,15 @@ services:
   dbt:
     image: ghcr.io/dbt-labs/dbt-postgres:1.5.0
     container_name: dbt_runner
-    profiles: [ "tools" ] # Only runs when explicitly called
+    entrypoint: /bin/sh -c "sleep infinity"
     volumes:
-      - ./dbt:/opt/dbt
-      - ~/.dbt:/root/.dbt # Map local profiles if needed
-    working_dir: /opt/dbt
+      - ./dbt:/usr/app/dbt  # Standard dbt working directory
+    environment:
+      - DBT_PROFILES_DIR=/usr/app/dbt
+      - DBT_POSTGRES_HOST=warehouse_postgres
+      - DBT_POSTGRES_USER=warehouse
+      - DBT_POSTGRES_PW=warehouse
+      - DBT_POSTGRES_DB=warehouse
+    working_dir: /usr/app/dbt
     depends_on:
       - warehouse_postgres
