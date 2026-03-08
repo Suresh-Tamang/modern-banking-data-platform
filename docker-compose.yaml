@@ -1,66 +1,105 @@
 version: '3.8'
 
+x-common-env: &common-env
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: 5432
+
 services:
+  # Metadata Database (Airflow & Superset)
   postgres:
-    image: postgres:15
+    image: postgres:15-alpine
+    container_name: metadata_db
     environment:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
     volumes:
-      - .db/postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+      - ./db/postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # Dedicated Data Warehouse
   warehouse_postgres:
-    image: postgres:15
+    image: postgres:15-alpine
+    container_name: warehouse_db
     environment:
       POSTGRES_USER: warehouse
       POSTGRES_PASSWORD: warehouse
       POSTGRES_DB: warehouse
     volumes:
-      - .db/postgres_warehouse:/var/lib/postgresql/data
+      - ./db/postgres_warehouse:/var/lib/postgresql/data
     ports:
       - "5433:5432"
 
   airflow:
     image: apache/airflow:2.7.0
+    container_name: airflow_webserver
     environment:
-      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+      <<: *common-env
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@metadata_db:5432/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     volumes:
-      - ./dags:/opt/airflow/dags
-      - ./logs:/opt/airflow/logs
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./airflow/plugins:/opt/airflow/plugins
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
-    command: bash -c "airflow db init && airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com || true && airflow webserver"
-
-  dbt:
-    image: ghcr.io/dbt-labs/dbt-postgres:1.5.0
-    volumes:
-      - ./dbt:/opt/dbt
-    working_dir: /opt/dbt
-    depends_on:
-      - postgres
-
-  python:
-    image: python:3.10
-    volumes:
-      - ./etl:/app/etl
-    working_dir: /app/etl
-    command: tail -f /dev/null
+      postgres:
+        condition: service_healthy
+    # Separating init from run ensures the DB is migrated before the webserver starts
+    command: >
+      bash -c "airflow db upgrade && 
+      airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com || true && 
+      airflow webserver"
 
   superset:
-    image: apache/superset:3.0.0
+    image: apache/superset:3.0.0-py310
+    container_name: superset
     environment:
-      SUPERSET_SQLALCHEMY_DATABASE_URI: postgresql://airflow:airflow@postgres:5432/airflow
-      ADMIN_USERNAME: admin
-      ADMIN_PASSWORD: admin
+      SUPERSET_SECRET_KEY: "gnv1QiJWY7Na4zgQ7COrKDdyvvFA/qVh5BQ5pwyDMagkCiwdqXVjcwvx"
+      SQLALCHEMY_DATABASE_URI: postgresql://airflow:airflow@metadata_db:5432/superset
     ports:
       - "8088:8088"
     depends_on:
-      - postgres
-    command: bash -c "superset db upgrade && superset fab create-admin --username admin --firstname Admin --lastname User --email admin@example.com --password admin || true && superset load-examples || true && superset run -h 0.0.0.0"
+      postgres:
+        condition: service_healthy
+    command: >
+      bash -c "superset db upgrade && 
+      superset fab create-admin --username admin --firstname Admin --lastname User --email admin@example.com --password admin || true && 
+      superset init && 
+      superset run -p 8088 -h 0.0.0.0 --with-threads"
+
+  python_etl:
+    build: .
+    container_name: python_etl
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./pipeline:/app/etl
+      - ./requirements.txt:/app/requirements.txt
+    working_dir: /app/etl/pipeline
+    environment:
+      # Use the service names from docker-compose as hostnames
+      WAREHOUSE_HOST: warehouse_postgres
+      WAREHOUSE_DB: warehouse
+      WAREHOUSE_USER: warehouse
+      WAREHOUSE_PASSWORD: warehouse
+    restart: on-failure
+    depends_on:
+      - warehouse_postgres
+  dbt:
+    image: ghcr.io/dbt-labs/dbt-postgres:1.5.0
+    container_name: dbt_runner
+    profiles: [ "tools" ] # Only runs when explicitly called
+    volumes:
+      - ./dbt:/opt/dbt
+      - ~/.dbt:/root/.dbt # Map local profiles if needed
+    working_dir: /opt/dbt
+    depends_on:
+      - warehouse_postgres
