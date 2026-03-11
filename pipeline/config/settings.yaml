@@ -22,8 +22,6 @@ sources:
     per_page_param: "per_page"
     per_page: 50
     data_key: "results"
-  db:
-    query: "SELECT * FROM public.latest_users WHERE true LIMIT :limit OFFSET :offset"
   load:
     mode: "upsert"
     key_columns: ["id"]

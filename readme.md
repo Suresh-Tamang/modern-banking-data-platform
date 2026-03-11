@@ -27,6 +27,8 @@ Components:
 ### Settings
 - `pipeline/config/settings.yaml`: tables, data sources (file/api/db), default load mode, key columns.
 
+### Locally hosted api for this project
+- Mock API: https://github.com/Suresh-Tamang/banking-rest-api (locally host this repo for api)
 ### Environment variables
 - `pipeline/.env` (loaded by `python_etl`):
   - `POSTGRES_DSN=postgresql+psycopg2://warehouse:warehouse@warehouse_db:5432/warehouse`
