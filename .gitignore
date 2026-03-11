@@ -2,9 +2,6 @@
 note.txt
 dbt/logs/
 .venv
-dags
-.db
-dbt
 plugins
 __pycache__
 *.pyc
@@ -24,6 +21,5 @@ venv.bak/
 *.tmp
 *.log
 db
-airflow/logs
-airflow/plugins
 tables.sql
+note.txt

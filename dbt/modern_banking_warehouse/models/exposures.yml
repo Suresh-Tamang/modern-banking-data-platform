@@ -1,0 +1,16 @@
+version: 2
+
+exposures:
+  - name: bank_dashboard
+    type: dashboard
+    maturity: high
+
+    depends_on:
+      - ref('gold_transaction_summary')
+      - ref('gold_loan_summary')
+      - ref('gold_transaction_summary')
+      - ref('gold_loan_summary')
+
+    owner:
+      name: Data Team
+      email: data@bank.com

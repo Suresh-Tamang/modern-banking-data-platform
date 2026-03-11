@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: public
+    tables:
+      - name: transactions
+      - name: accounts
+      - name: branches
+      - name: loans
+      - name: customers
