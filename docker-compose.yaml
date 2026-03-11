@@ -43,10 +43,12 @@ services:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@metadata_db:5432/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      DOCKER_API_VERSION: "1.44"
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/plugins:/opt/airflow/plugins
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "8080:8080"
     depends_on:
@@ -56,7 +58,8 @@ services:
     command: >
       bash -c "airflow db upgrade && 
       airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com || true && 
-      airflow webserver"
+      airflow webserver &
+      airflow scheduler"
 
   superset:
     image: apache/superset:3.0.0-py310
@@ -84,7 +87,6 @@ services:
       - ./pipeline:/app/etl
     working_dir: /app/etl
     environment:
-      # Use the service names from docker-compose as hostnames
       WAREHOUSE_HOST: warehouse_postgres
       WAREHOUSE_DB: warehouse
       WAREHOUSE_USER: warehouse
@@ -97,13 +99,15 @@ services:
     container_name: dbt_runner
     entrypoint: /bin/sh -c "sleep infinity"
     volumes:
-      - ./dbt:/usr/app/dbt  # Standard dbt working directory
+      - ./dbt:/usr/app/dbt  
     environment:
       - DBT_PROFILES_DIR=/usr/app/dbt
       - DBT_POSTGRES_HOST=warehouse_postgres
       - DBT_POSTGRES_USER=warehouse
       - DBT_POSTGRES_PW=warehouse
       - DBT_POSTGRES_DB=warehouse
-    working_dir: /usr/app/dbt
+    working_dir: /usr/app/dbt/modern_banking_warehouse
+    ports:
+      - "3000:3000"
     depends_on:
       - warehouse_postgres

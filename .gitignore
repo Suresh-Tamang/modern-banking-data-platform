@@ -26,3 +26,4 @@ venv.bak/
 db
 airflow/logs
 airflow/plugins
+tables.sql
