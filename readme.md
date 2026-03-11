@@ -1,6 +1,5 @@
 # Modern Banking Data Platform
-
-A complete end-to-end data engineering solution for a banking domain built on Airflow, Postgres (metadata and warehouse), dbt, and Python-based ETL chunks.
+The Modern Banking Data Platform (MBDP) is a data engineering project designed to simulate how financial institutions collect, process, and manage large volumes of transactional data using modern data pipeline practices. The goal of this project is to build a structured ETL (Extract, Transform, Load) pipeline that ingests banking data from APIs, processes and validates the data, and loads it into a PostgreSQL warehouse for further analysis and reporting.
 
 ## Project overview
 
