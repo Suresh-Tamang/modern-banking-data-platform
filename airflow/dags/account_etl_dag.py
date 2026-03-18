@@ -27,4 +27,4 @@ with DAG(
         sla=timedelta(minutes=20)
     )
 
-    execute_account_etl
+    execute_account_etlt
